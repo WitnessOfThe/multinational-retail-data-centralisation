@@ -10,55 +10,45 @@ if __name__ == '__main__':
     db = DatabaseConnector()
     dc = DataCleaning()
 
-    cred = db.read_db_creds("db_creds_remote.yaml") 
-    engine = db.init_db_engine(cred)
-    engine.connect()
+#    cred   = db.read_db_creds("db_creds_remote.yaml") 
+ #   engine = db.init_db_engine(cred)
+  #  engine.connect()
 
-    tables_list = db.list_db_tables(engine)
-    print(tables_list)
-    df_name = tables_list[1]
+#    tables_list = db.list_db_tables(engine)
+ #   df_name = tables_list[1]
+  #  df = dc.clean_user_data(de.read_rds_table( engine, df_name), df_name)
+   # print(df.head())
 
-    df = dc.clean_user_data(de.read_rds_table( engine,df_name),df_name)
-    
-    cred   = db.read_db_creds("db_creds local.yaml") 
-    engine = db.init_db_engine(cred)
-    engine.connect()
-    db.upload_to_db(df,'dim_users',engine)
+#    cred   = db.read_db_creds("db_creds local.yaml") 
+ #   engine = db.init_db_engine(cred)
+  #  engine.connect()
+   # db.upload_to_db(df,'dim_users',engine)
 
-    print(df.head())   
-    print(df.info())
-    print(df.describe())
- #   df.drop(df['store_code'].isnull().index,inplace=True)
-#    df = df[df['store_code'].notnull()]
- #   df = df[df['address'].notnull()]
- #   df['opening_date'] = pd.to_datetime(df['opening_date'], errors = 'coerce')
+## Call From PDF
+#    df = de.retrieve_pdf_data('https://data-handling-public.s3.eu-west-1.amazonaws.com/card_details.pdf')
+ #   print(df.head())
+  #  df = dc.clean_card_data(df)
 
+#    cred   = db.read_db_creds("db_creds local.yaml") 
+ #   engine = db.init_db_engine(cred)
+  #  engine.connect()
+   # db.upload_to_db(df,'dim_card_details',engine)
+     
+#    print(df.head())
 #    print(df.info())
- #       df.reset_index()
 
-    
-#    filt = df['store_code'] != 'None'    
- #   df = df.drop(index = df[filt].index)
-#    print(df["address"].isnull())
+## API Calls
+#    df = de.retrieve_stores_data()
+ #   print(df.head())
+  #  print(df.info())
+   # df = dc.called_clean_store_data(df)
+   # print(df.head())
+   # print(df.info())
+   # cred   = db.read_db_creds("db_creds local.yaml") 
+   # engine = db.init_db_engine(cred)
+   # engine.connect()
+   # db.upload_to_db(df,'dim_store_details',engine)
 
- #   print(table['store_code'].duplicated().sum())
-    
-#    print(table[table['store_code'].duplicated()])
-
- #   print(table[table['index']== 405])
-
-    #print(table.columns())
-#    for col in table.columns:
- #       print(col)
-#    print(table['user_uuid'].duplicated().sum())        
-
- #   table.dropna(inplace=True)
-#    print(table.head(5))
-#    print(table.info())
- #   print(table.describe())
-
- #    table.drop(0,axis = 'index',inplace=True)    
-#    print(table[table['address'] =='N/A'])
- #   table["opening_date"] = pd.to_datetime(table["opening_date"], format = "%Y-%m-%d")     print(table["opening_date"][1])
+## CSV Call
 
 # %%
