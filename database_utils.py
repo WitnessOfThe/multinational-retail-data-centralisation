@@ -4,6 +4,7 @@ import pandas as pd
 import tabula
 from sqlalchemy import create_engine
 from sqlalchemy import inspect
+
 class DatabaseConnector:
 
     def __init__(self):

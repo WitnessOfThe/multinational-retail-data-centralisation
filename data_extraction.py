@@ -37,4 +37,15 @@ class DataExtractor:
                                 headers=self.API_key()
                                 )
         return response.json()['number_stores']
-    def extract_from_s3(self)
+
+    def extract_from_s3(self):
+        s3_client = boto3.client(
+                                    "s3"
+                                )
+        response = s3_client.get_object(Bucket='data-handling-public', Key='products.csv')
+        status   = response.get("ResponseMetadata", {}).get("HTTPStatusCode")
+        if status == 200:
+            print(f"Successful S3 get_object response. Status - {status}")
+            return pd.read_csv(response.get("Body"))
+        else:
+            print(f"Unsuccessful S3 get_object response. Status - {status}")
