@@ -24,9 +24,9 @@ class DataExtractor:
         for _ in range(store_number):
             api_url_base = f'https://aqj7u5id95.execute-api.eu-west-1.amazonaws.com/prod/store_details/{_}'
             response = requests.get(
-                                api_url_base,
-                                headers=self.API_key()
-                                )
+                                    api_url_base,
+                                    headers=self.API_key()
+                                    )
             list_of_frames.append( pd.json_normalize(response.json()))
         return pd.concat(list_of_frames)
                                 
@@ -49,3 +49,16 @@ class DataExtractor:
             return pd.read_csv(response.get("Body"))
         else:
             print(f"Unsuccessful S3 get_object response. Status - {status}")
+
+    def extract_from_s3_by_link(self):
+        url = 'https://data-handling-public.s3.eu-west-1.amazonaws.com/date_details.json'
+        response = requests.get(url) 
+        dic      = response.json()
+        df       = pd.DataFrame([])
+        for column_name in dic.keys():
+            value_list = []
+            for _ in dic[column_name].keys():
+                value_list.append(dic[column_name][_])
+            df[column_name] = value_list
+        return df
+        

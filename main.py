@@ -66,21 +66,39 @@ if __name__ == '__main__':
 
 ## rdb_call_for_orders
 
-    cred   = db.read_db_creds("db_creds_remote.yaml") 
-    engine = db.init_db_engine(cred)
-    engine.connect()
+#    cred   = db.read_db_creds("db_creds_remote.yaml") 
+#    engine = db.init_db_engine(cred)
+#    engine.connect()
 
-    tables_list = db.list_db_tables(engine)
-    df_name = tables_list[2]
-    df = de.read_rds_table( engine, df_name)
+#    tables_list = db.list_db_tables(engine)
+#    df_name = tables_list[2]
+#    df = de.read_rds_table( engine, df_name)
+#    print(df.head())
+#    print(df.info())    
+#    df = dc.clean_order_data(df)
+#    print(df.head())
+#    print(df.info())    
+
+#    cred   = db.read_db_creds("db_creds local.yaml") 
+#    engine = db.init_db_engine(cred)
+#    engine.connect()
+#    db.upload_to_db(df,'orders_table',engine)
+
+## dim_date_times
+
+    df = de.extract_from_s3_by_link()
     print(df.head())
     print(df.info())    
-    df = dc.clean_order_data(df)
-    print(df.head())
-    print(df.info())    
+    print(df['month'].unique())    
+    print(df['year'].unique())    
 
+    df = dc.clean_date_time(df)
+    print(df.head())
+    print(df.info())  
     cred   = db.read_db_creds("db_creds local.yaml") 
     engine = db.init_db_engine(cred)
     engine.connect()
-    db.upload_to_db(df,'orders_table',engine)
+    db.upload_to_db(df,'dim_date_times',engine)
+
+
 # %%

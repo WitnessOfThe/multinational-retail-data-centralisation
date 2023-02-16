@@ -31,6 +31,15 @@ class DataCleaning:
         df.dropna(how='any',inplace= True)
         return df
 
+    def clean_date_time(self,df):
+        df['month']         =  pd.to_numeric( df['month'],errors='coerce', downcast="integer")
+        df['year']          =  pd.to_numeric( df['year'], errors='coerce', downcast="integer")
+        df['day']           =  pd.to_numeric( df['day'], errors='coerce', downcast="integer")
+        df['timestamp']     =  pd.to_datetime(df['timestamp'], format='%H:%M:%S', errors='coerce')
+        df.dropna(how='any',inplace= True)
+        df.reset_index(inplace=True)       
+        return df
+
     def clean_products_data(self,df):
         df['date_added']            =  pd.to_datetime(df['date_added'], format='%Y-%m-%d', errors='coerce')
         df.dropna(how='any',inplace= True)
