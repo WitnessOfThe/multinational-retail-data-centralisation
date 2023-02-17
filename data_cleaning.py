@@ -1,5 +1,6 @@
 import pandas as pd
 import numpy as np
+import re
 class DataCleaning:
 
     def clean_user_data(self,df):
@@ -14,20 +15,24 @@ class DataCleaning:
         df.drop(columns='first_name',inplace=True)
         df.drop(columns='last_name',inplace=True)
         df.drop(columns='level_0',inplace=True)
+        df['card_number'] = df['card_number'].apply(self.isDigits)
         df.dropna(how='any',inplace= True)
         return df
 
     def called_clean_store_data(self,df):
         df.drop(columns='lat',inplace=True)
-        df = self.clean_invalid_date(df,'opening_date')             
-        df.dropna(subset = 'country_code',how='any',inplace= True)
+        df                  =  self.clean_invalid_date(df,'opening_date')                     
+        df['staff_numbers'] =  pd.to_numeric( df['staff_numbers'].apply(self.remove_char_from_string),errors='coerce', downcast="integer") 
+        df.dropna(subset = ['staff_numbers'],how='any',inplace= True)
         return df
 
+    def remove_char_from_string(self,value):
+        return re.sub(r'\D', '',value)
+
     def clean_card_data(self,df):
-        df['card_number']            =  pd.to_numeric( df['card_number'],errors='coerce', downcast="integer")
-        df['expiry_date']            =  pd.to_datetime(df['expiry_date'], format='%m/%d', errors='coerce')
-        df['card_provider']          =  df['card_provider'].astype('str',errors='ignore')
-        df['date_payment_confirmed'] =  pd.to_datetime(df['date_payment_confirmed'], format='%Y-%m-%d', errors='coerce') 
+        df['card_number'] = df['card_number'].apply(str)
+        df['card_number'] = df['card_number'].str.replace('?','')
+        df = self.clean_invalid_date(df,'date_payment_confirmed')  
         df.dropna(how='any',inplace= True)
         return df
 
@@ -41,32 +46,50 @@ class DataCleaning:
         return df
 
     def clean_products_data(self,df):
-        df['date_added']            =  pd.to_datetime(df['date_added'], format='%Y-%m-%d', errors='coerce')
+        df =  self.clean_invalid_date(df,'date_added')             
         df.dropna(how='any',inplace= True)
         df.reset_index(inplace=True)       
         return df
 
     def convert_product_weights(self,df,column_name):
-#        df[column_name] = df.apply(lambda x:self.get_grams(x[column_name]))
         df[column_name] = df[column_name].apply(self.get_grams)
         return df
 
     def get_grams(self,value):
         value = str(value)
+        value = value.replace(' .','')
         if value.endswith('kg'):
             value = value.replace('kg','')
+            value = self.check_math_operation(value)
             return 1000*float(value) if self.isfloat(value) else np.nan
         elif value.endswith('g'):   
             value = value.replace('g','')
+            value = self.check_math_operation(value)
             return float(value) if self.isfloat(value) else np.nan
         elif value.endswith('ml'):   
             value = value.replace('ml','')
+            value = self.check_math_operation(value)
             return float(value) if self.isfloat(value) else np.nan
         elif value.endswith('l'):   
             value = value.replace('l','')
+            value = self.check_math_operation(value)
             return 1000*float(value) if self.isfloat(value) else np.nan
+        elif value.endswith('oz'):   
+            value = value.replace('oz','')
+            value = self.check_math_operation(value)
+            return 28.3495*float(value) if self.isfloat(value) else np.nan
         else:
             np.nan
+
+    def check_math_operation(self,value):
+        if 'x' in value:
+            value.replace(' ','')
+            lis_factors = value.split('x')
+            return str(float(lis_factors[0])*float(lis_factors[1]))
+        return value
+
+    def isDigits(self,num):
+        return str(num) if str(num).isdigit() else np.nan
 
     def isfloat(self,num):
         try:
@@ -74,25 +97,15 @@ class DataCleaning:
             return True
         except ValueError:
             return False
-
-    def clean_custom_str(self,df):
-#       There should be better way
-        list_of_removal = ['None','N/A']        
-        for col in df.columns:            
-            for _ in list_of_removal:
-                filt = df[col] == _
-                df.drop(index = df[filt].index,inplace =True)
-        return df
             
     def clean_invalid_date(self,df,column_name):
-#       There should be better way
         df[column_name] = pd.to_datetime(df[column_name], format='%Y-%m-%d', errors='ignore')
         df[column_name] = pd.to_datetime(df[column_name], format='%Y %B %d', errors='ignore')
         df[column_name] = pd.to_datetime(df[column_name], format='%B %Y %d', errors='ignore')
         df[column_name] = pd.to_datetime(df[column_name], errors='coerce')
         df.dropna(subset = column_name,how='any',inplace= True)
-#        df.reset_index(inplace=True)       
         return df
+
 if __name__ == '__main__':
 
     dc = DataCleaning()

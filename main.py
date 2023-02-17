@@ -1,104 +1,108 @@
 #%%
-from database_utils import DatabaseConnector 
+from database_utils  import DatabaseConnector 
 from data_extraction import DataExtractor 
-from data_cleaning  import DataCleaning
+from data_cleaning   import DataCleaning
 import pandas as pd
 
-if __name__ == '__main__':
-
+def upload_dim_users():
     de = DataExtractor()
     db = DatabaseConnector()
     dc = DataCleaning()
+    # connect to base and get list of frames
+    cred   = db.read_db_creds("db_creds_remote.yaml") 
+    engine = db.init_db_engine(cred)
+    engine.connect()
+    tables_list = db.list_db_tables(engine)
+    # get clean chosen frame
+    df_name = tables_list[1]
+    df = dc.clean_user_data(de.read_rds_table( engine, df_name))
+    print(df.head())
+    # upload to the db
+    cred   = db.read_db_creds("db_creds local.yaml") 
+    engine = db.init_db_engine(cred)
+    engine.connect()
+    db.upload_to_db(df,'dim_users',engine)
 
-#    cred   = db.read_db_creds("db_creds_remote.yaml") 
- #   engine = db.init_db_engine(cred)
-  #  engine.connect()
+def upload_dim_card_details():
+    de = DataExtractor()
+    db = DatabaseConnector()
+    dc = DataCleaning()  
+    # get data from pdf
+    df = de.retrieve_pdf_data('https://data-handling-public.s3.eu-west-1.amazonaws.com/card_details.pdf')
+    print(df.head())
+    print(df.info())
+    # clean data
+    df = dc.clean_card_data(df)
+    print(df.info())
+    print(df.head())
+    # upload to the db
+    cred   = db.read_db_creds("db_creds local.yaml") 
+    engine = db.init_db_engine(cred)
+    db.upload_to_db(df,'dim_card_details',engine)
 
-#    tables_list = db.list_db_tables(engine)
- #   df_name = tables_list[1]
-  #  df = dc.clean_user_data(de.read_rds_table( engine, df_name))
-   # print(df.head())
+def upload_dim_products():
+    de = DataExtractor()
+    db = DatabaseConnector()
+    dc = DataCleaning()  
+    # get data from s3
+    df =  de.extract_from_s3()
+    df =  dc.convert_product_weights(df,'weight')
+    # clean data 
+    df =  dc.clean_products_data(df)
+    # upload to db 
+    cred   = db.read_db_creds("db_creds local.yaml") 
+    engine = db.init_db_engine(cred)
+    engine.connect()
+    db.upload_to_db(df,'dim_products',engine)
 
-#    cred   = db.read_db_creds("db_creds local.yaml") 
- #   engine = db.init_db_engine(cred)
-  #  engine.connect()
-   # db.upload_to_db(df,'dim_users',engine)
+def upload_dim_store_details():
+    de = DataExtractor()
+    db = DatabaseConnector()
+    dc = DataCleaning()  
+    # get data
+    df = de.retrieve_stores_data()
+    # clean data 
+    df = dc.called_clean_store_data(df)
+    # upload to db 
+    cred   = db.read_db_creds("db_creds local.yaml") 
+    engine = db.init_db_engine(cred)
+    engine.connect()
+    db.upload_to_db(df,'dim_store_details',engine)
 
-## Call From PDF
-#    df = de.retrieve_pdf_data('https://data-handling-public.s3.eu-west-1.amazonaws.com/card_details.pdf')
- #   print(df.head())
-  #  df = dc.clean_card_data(df)
+def upload_orders():
+    de = DataExtractor()
+    db = DatabaseConnector()
+    dc = DataCleaning()
+    # connect to db
+    cred   = db.read_db_creds("db_creds_remote.yaml") 
+    engine = db.init_db_engine(cred)
+    engine.connect()
+    tables_list = db.list_db_tables(engine)
+    # get frame name and download
+    df_name = tables_list[2]
+    df = de.read_rds_table( engine, df_name)
+    # clean data 
+    df = dc.clean_order_data(df)
+    # upload to db 
+    cred   = db.read_db_creds("db_creds local.yaml") 
+    engine = db.init_db_engine(cred)
+    engine.connect()
+    db.upload_to_db(df,'orders_table',engine)
 
-#    cred   = db.read_db_creds("db_creds local.yaml") 
- #   engine = db.init_db_engine(cred)
-  #  engine.connect()
-   # db.upload_to_db(df,'dim_card_details',engine)
-     
-#    print(df.head())
-#    print(df.info())
-
-## API Calls
-#    df = de.retrieve_stores_data()
- #   print(df.head())
-  #  print(df.info())
-   # df = dc.called_clean_store_data(df)
-   # print(df.head())
-   # print(df.info())
-   # cred   = db.read_db_creds("db_creds local.yaml") 
-   # engine = db.init_db_engine(cred)
-   # engine.connect()
-   # db.upload_to_db(df,'dim_store_details',engine)
-
-## CSV Call
-
-#    df =  de.extract_from_s3()
-#    print(df.head())
-#    print(df.info())    
-#    df =  dc.convert_product_weights(df,'weight')
-#    df =  dc.clean_products_data(df)
-#    print(df.head())
-#    print(df.info())    
-#    cred   = db.read_db_creds("db_creds local.yaml") 
-#    engine = db.init_db_engine(cred)
-#    engine.connect()
-#    db.upload_to_db(df,'dim_products',engine)
-
-
-## rdb_call_for_orders
-
-#    cred   = db.read_db_creds("db_creds_remote.yaml") 
-#    engine = db.init_db_engine(cred)
-#    engine.connect()
-
-#    tables_list = db.list_db_tables(engine)
-#    df_name = tables_list[2]
-#    df = de.read_rds_table( engine, df_name)
-#    print(df.head())
-#    print(df.info())    
-#    df = dc.clean_order_data(df)
-#    print(df.head())
-#    print(df.info())    
-
-#    cred   = db.read_db_creds("db_creds local.yaml") 
-#    engine = db.init_db_engine(cred)
-#    engine.connect()
-#    db.upload_to_db(df,'orders_table',engine)
-
-## dim_date_times
-
+def dim_date_times():
+    de = DataExtractor()
+    db = DatabaseConnector()
+    dc = DataCleaning()
     df = de.extract_from_s3_by_link()
-    print(df.head())
-    print(df.info())    
-    print(df['month'].unique())    
-    print(df['year'].unique())    
-
     df = dc.clean_date_time(df)
-    print(df.head())
-    print(df.info())  
     cred   = db.read_db_creds("db_creds local.yaml") 
     engine = db.init_db_engine(cred)
     engine.connect()
     db.upload_to_db(df,'dim_date_times',engine)
+
+if __name__ == '__main__':
+  pass
+
 
 
 # %%

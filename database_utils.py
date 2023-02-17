@@ -1,7 +1,6 @@
-import yaml
 import psycopg2
 import pandas as pd
-import tabula
+import yaml
 from sqlalchemy import create_engine
 from sqlalchemy import inspect
 
@@ -15,7 +14,7 @@ class DatabaseConnector:
             try:
                 return yaml.safe_load(stream)
             except yaml.YAMLError as exc:
-                print(exc)        
+                print(exc)
 
     def init_db_engine(self,cred):
         engine = create_engine(f"{'postgresql'}+{'psycopg2'}://{cred['RDS_USER']}:{cred['RDS_PASSWORD']}@{cred['RDS_HOST']}:{cred['RDS_PORT']}/{cred['RDS_DATABASE']}")
@@ -32,7 +31,7 @@ if __name__ == '__main__':
     db = DatabaseConnector()
     engine = db.init_db_engine()
     engine.connect()
-    print("Hi")
+    print("Hi") 
     print(engine)
     tables_list = db.list_db_tables(engine)
     print(tables_list)
