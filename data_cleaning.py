@@ -46,7 +46,10 @@ class DataCleaning:
         return df
 
     def clean_products_data(self,df):
-        df =  self.clean_invalid_date(df,'date_added')             
+        df =  self.clean_invalid_date(df,'date_added')
+#        df['product_price'] = df['product_price'].apply(str)
+ #       df['product_price'] = df['product_price'].str.replace('£','')
+  #      df['product_price'] = pd.to_numeric(df['product_price'])
         df.dropna(how='any',inplace= True)
         df.reset_index(inplace=True)       
         return df
@@ -106,7 +109,7 @@ class DataCleaning:
         df.dropna(subset = column_name,how='any',inplace= True)
         return df
 
-if __name__ == '__main__':
+if __name__ == '__main__':  
 
     dc = DataCleaning()
 
