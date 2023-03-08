@@ -11,7 +11,7 @@ During this project we need to perform three types of tasks:
 2. Data cleaning. In "data_cleaning.py" we develope class DataCleaning that clean different tables, that we uploaded in "data_extraction.py". 
 3. Uploading data into database. We write DatabaseConnector class "database_utils.py", which initiating database engine basing on credentials provided in "*.yml" file.
  
-## Step by step data download
+## Step by step data processing
 
 We have 6 different data sources with data. 
 
@@ -22,18 +22,78 @@ We have 6 different data sources with data.
 5. The restful-API.  The "dim_store_details" data is availble by GET method. The ".json" response has to be converted into the pandas dataframe. The primary key field is "store_code".
 6. The "dim_date_times" data is available by link. The ".json" response has to be converted into the pandas datagrame. The primary key is "date_uuid".
  
+After uploading clean data into the database, one need to transform data into apropriate format and add some additional columns with additional data insights.
+First, we consider example of format converting:
 
-## General Data Cleaning Notes
+```
+ ALTER TABLE dim_products
+	  ALTER COLUMN product_price TYPE float USING product_price::double precision, 
+	  ALTER COLUMN weight TYPE float USING weight::double precision, 
+	  ALTER COLUMN product_code TYPE VARCHAR(255),
+	  ALTER COLUMN uuid TYPE uuid using uuid::uuid,
+	  ALTER COLUMN still_available Type Bool using still_available::boolean,
+	  ALTER COLUMN weight_class Type varchar(50),
+	  ALTER COLUMN "EAN" Type varchar(255),
+```
+
+The next step would be adding foreign and primary keys in connected tables
+
+```
+ALTER TABLE dim_products
+  ADD PRIMARY KEY (product_code);
+ALTER TABLE orders_table 
+  ADD FOREIGN KEY(product_code) 
+  REFERENCES dim_products(product_code);
+```
+
+The
+ALTER TABLE dim_products
+ADD weight_class VARCHAR(30);
+UPDATE dim_products
+SET weight_class = 
+  CASE 
+    when weight/1000 < 2 then 'Light'
+    when weight/1000 between 2 and 40 then 'Mid_Sized'
+    when weight/1000 between 41 and 140 then 'Heavy'
+    when weight/1000 > 140 then 'Truck_Required'  
+  else 'Invalid' 
+  END;
+  
+ALTER TABLE dim_products
+RENAME COLUMN removed TO still_available;
+  
+UPDATE dim_products
+SET still_available = 
+  CASE 
+    when still_available = 'Still_available' then True
+    when still_available = 'Removed' then False
+  END;
+  UPDATE dim_products SET product_price = REPLACE(product_price, '£', '');
+  
+  ALTER TABLE dim_products
+	  ALTER COLUMN product_price TYPE float USING product_price::double precision, 
+	  ALTER COLUMN weight TYPE float USING weight::double precision, 
+	  ALTER COLUMN product_code TYPE VARCHAR(255),
+	  ALTER COLUMN uuid TYPE uuid using uuid::uuid,
+	  alter column still_available Type Bool using still_available::boolean,
+	  alter column weight_class Type varchar(50),
+	  alter column "EAN" Type varchar(255),
+	  ADD PRIMARY KEY (product_code);
+	  
+  ALTER TABLE orders_table 
+	ADD FOREIGN KEY(product_code) 
+	REFERENCES dim_products(product_code);
+```
+
+### General Data Cleaning Notes
 
 1. All data cleaning has to be performed in concern of "primary key" field. Therefore, we remove raws of the table only in the case, if duplicates (NaNs, missing value etc) appear in this field. Otherwise, there is a risk that in the "foreign key" in the "orders_table" will not be found in "primary key" and database schema would not work.
 2. The date transformation has to account for different time formats, so we fix this issie in the following way
-
 ```
         df[column_name] = pd.to_datetime(df[column_name], format='%Y-%m-%d', errors='ignore')
         df[column_name] = pd.to_datetime(df[column_name], format='%Y %B %d', errors='ignore')
         df[column_name] = pd.to_datetime(df[column_name], format='%B %Y %d', errors='ignore')
         df[column_name] = pd.to_datetime(df[column_name], errors='coerce')
-
 ```
 
 ## SQL queries
