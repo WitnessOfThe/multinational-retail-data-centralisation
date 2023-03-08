@@ -13,7 +13,7 @@ During this project we need to perform three types of tasks:
  
 ## Step by step data processing
 
-We have 6 different data sources with data. 
+We have 6 different dataframes. 
 
 1. Remote Postgres database in AWS Cloud. The table "order_table" is the data of the most interest for the client as it contain actual sales information. In the table we need to use the following fields "date_uuid","user_uuid","card_number","store_code","product_code" and "product_quantity". First 5 fields will become foreign keys in our database, therefore we need to clean this columns from all Nans and missing values. The "product_quantity" field has to be an integer.
 2. Remote Postgres database in AWS Cloud. The users data  "dim_users" table. This table also stored in remote database, so we use the same upload technics as in the previus case. Primary key here is the "user_uuid" field.
@@ -21,7 +21,17 @@ We have 6 different data sources with data.
 4. The AWS-s3 bucket. The "dim_product" table. We utilise boto3 package to download this data. The primary key is the "product code" field. The field "product_price" has to be converted into float number and field "weight" has to convert into grams concerning cases like ("kg","oz","l","ml").
 5. The restful-API.  The "dim_store_details" data is availble by GET method. The ".json" response has to be converted into the pandas dataframe. The primary key field is "store_code".
 6. The "dim_date_times" data is available by link. The ".json" response has to be converted into the pandas datagrame. The primary key is "date_uuid".
- 
+
+#### General Data Cleaning Notes
+
+1. All data cleaning has to be performed in concern of "primary key" field. Therefore, we remove raws of the table only in the case, if duplicates (NaNs, missing value etc) appear in this field. Otherwise, there is a risk that in the "foreign key" in the "orders_table" will not be found in "primary key" and database schema would not work.
+2. The date transformation has to account for different time formats, so we fix this issie in the following way
+```
+        df[column_name] = pd.to_datetime(df[column_name], format='%Y-%m-%d', errors='ignore')
+        df[column_name] = pd.to_datetime(df[column_name], format='%Y %B %d', errors='ignore')
+        df[column_name] = pd.to_datetime(df[column_name], format='%B %Y %d', errors='ignore')
+        df[column_name] = pd.to_datetime(df[column_name], errors='coerce')
+```
 After uploading clean data into the database, one need to transform data into apropriate format and add some additional columns with additional data insights.
 Let's consider typical workflow
 1. Convert data fields
@@ -45,41 +55,32 @@ ALTER TABLE orders_table
 	ADD FOREIGN KEY(product_code) 
 	REFERENCES dim_products(product_code);
 ```
-3. Create additional columns with conditional data segmentation. Here we want to have segments, which will help build store logistics based on products weight, and availability flags
+3. Create additional columns with conditional data segmentation. Here we want to have segments, which will help build store logistics based on products weight. Also we want to remove string based availability flags to proper boolean format.
 ```
 ALTER TABLE dim_products
-ADD weight_class VARCHAR(30);
+	ADD weight_class VARCHAR(30);
 UPDATE dim_products
-SET weight_class = 
-  CASE 
-    when weight/1000 < 2 then 'Light'
-    when weight/1000 between 2 and 40 then 'Mid_Sized'
-    when weight/1000 between 41 and 140 then 'Heavy'
-    when weight/1000 > 140 then 'Truck_Required'  
-  else 'Invalid' 
-  END;
+	SET weight_class = 
+		CASE 
+			when weight/1000 < 2 then 'Light'
+			when weight/1000 between 2 and 40 then 'Mid_Sized'
+			when weight/1000 between 41 and 140 then 'Heavy'
+			when weight/1000 > 140 then 'Truck_Required'  
+		else 'Invalid' 
+		END;
   
 ALTER TABLE dim_products
-RENAME COLUMN removed TO still_available;
+	RENAME COLUMN removed TO still_available;
   
 UPDATE dim_products
-SET still_available = 
-  CASE 
-    when still_available = 'Still_available' then True
-    when still_available = 'Removed' then False
-  END;
+	SET still_available = 
+		CASE 
+			when still_available = 'Still_available' then True
+			when still_available = 'Removed' then False
+		END;
 ```
 
-### General Data Cleaning Notes
 
-1. All data cleaning has to be performed in concern of "primary key" field. Therefore, we remove raws of the table only in the case, if duplicates (NaNs, missing value etc) appear in this field. Otherwise, there is a risk that in the "foreign key" in the "orders_table" will not be found in "primary key" and database schema would not work.
-2. The date transformation has to account for different time formats, so we fix this issie in the following way
-```
-        df[column_name] = pd.to_datetime(df[column_name], format='%Y-%m-%d', errors='ignore')
-        df[column_name] = pd.to_datetime(df[column_name], format='%Y %B %d', errors='ignore')
-        df[column_name] = pd.to_datetime(df[column_name], format='%B %Y %d', errors='ignore')
-        df[column_name] = pd.to_datetime(df[column_name], errors='coerce')
-```
 
 ## SQL queries
 
