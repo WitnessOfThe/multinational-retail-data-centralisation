@@ -1,8 +1,6 @@
-# multinational-retail-data-centralisation
-## Project Goal
-
+# Data Centralisation Project
 In this project our goal is to prepare data to be uploaded into the PostgreSQL database in and show some data insights using SQL queries. 
-Technologies used Pandas
+
 ## Project Structure
 
 ## Project utils
@@ -25,18 +23,18 @@ We have 6 different data sources with data.
 6. The "dim_date_times" data is available by link. The ".json" response has to be converted into the pandas datagrame. The primary key is "date_uuid".
  
 
-### General Data Cleaning Notes
+## General Data Cleaning Notes
 
 1. All data cleaning has to be performed in concern of "primary key" field. Therefore, we remove raws of the table only in the case, if duplicates (NaNs, missing value etc) appear in this field. Otherwise, there is a risk that in the "foreign key" in the "orders_table" will not be found in "primary key" and database schema would not work.
 2. The date transformation has to account for different time formats, so we fix this issie in the following way
 
-'''
+```
         df[column_name] = pd.to_datetime(df[column_name], format='%Y-%m-%d', errors='ignore')
         df[column_name] = pd.to_datetime(df[column_name], format='%Y %B %d', errors='ignore')
         df[column_name] = pd.to_datetime(df[column_name], format='%B %Y %d', errors='ignore')
         df[column_name] = pd.to_datetime(df[column_name], errors='coerce')
 
-'''
+```
 
 ## SQL queries
 
