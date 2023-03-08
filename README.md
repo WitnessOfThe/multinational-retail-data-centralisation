@@ -23,30 +23,30 @@ We have 6 different data sources with data.
 6. The "dim_date_times" data is available by link. The ".json" response has to be converted into the pandas datagrame. The primary key is "date_uuid".
  
 After uploading clean data into the database, one need to transform data into apropriate format and add some additional columns with additional data insights.
-First, we consider example of format converting:
-
+Let's consider typical workflow
+1. Convert data fields
 ```
- ALTER TABLE dim_products
-	  ALTER COLUMN product_price TYPE float USING product_price::double precision, 
-	  ALTER COLUMN weight TYPE float USING weight::double precision, 
-	  ALTER COLUMN product_code TYPE VARCHAR(255),
-	  ALTER COLUMN uuid TYPE uuid using uuid::uuid,
-	  ALTER COLUMN still_available Type Bool using still_available::boolean,
-	  ALTER COLUMN weight_class Type varchar(50),
-	  ALTER COLUMN "EAN" Type varchar(255),
+ALTER TABLE dim_products
+	ALTER COLUMN product_price TYPE float USING product_price::double precision, 
+	ALTER COLUMN weight TYPE float USING weight::double precision, 
+	ALTER COLUMN product_code TYPE VARCHAR(255),
+	ALTER COLUMN uuid TYPE uuid using uuid::uuid,
+	ALTER COLUMN still_available Type Bool using still_available::boolean,
+	ALTER COLUMN weight_class Type varchar(50),
+	ALTER COLUMN "EAN" Type varchar(255),
 ```
 
-The next step would be adding foreign and primary keys in connected tables
+2. Add foreign and primary keys in connected tables
 
 ```
 ALTER TABLE dim_products
-  ADD PRIMARY KEY (product_code);
+	ADD PRIMARY KEY (product_code);
 ALTER TABLE orders_table 
-  ADD FOREIGN KEY(product_code) 
-  REFERENCES dim_products(product_code);
+	ADD FOREIGN KEY(product_code) 
+	REFERENCES dim_products(product_code);
 ```
-
-The
+3. Create additional columns with conditional data segmentation. Here we want to have segments, which will help build store logistics based on products weight, and availability flags
+```
 ALTER TABLE dim_products
 ADD weight_class VARCHAR(30);
 UPDATE dim_products
@@ -68,21 +68,6 @@ SET still_available =
     when still_available = 'Still_available' then True
     when still_available = 'Removed' then False
   END;
-  UPDATE dim_products SET product_price = REPLACE(product_price, '£', '');
-  
-  ALTER TABLE dim_products
-	  ALTER COLUMN product_price TYPE float USING product_price::double precision, 
-	  ALTER COLUMN weight TYPE float USING weight::double precision, 
-	  ALTER COLUMN product_code TYPE VARCHAR(255),
-	  ALTER COLUMN uuid TYPE uuid using uuid::uuid,
-	  alter column still_available Type Bool using still_available::boolean,
-	  alter column weight_class Type varchar(50),
-	  alter column "EAN" Type varchar(255),
-	  ADD PRIMARY KEY (product_code);
-	  
-  ALTER TABLE orders_table 
-	ADD FOREIGN KEY(product_code) 
-	REFERENCES dim_products(product_code);
 ```
 
 ### General Data Cleaning Notes
