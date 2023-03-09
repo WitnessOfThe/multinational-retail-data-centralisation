@@ -195,6 +195,21 @@ group by 	dim_store_details.store_type,dim_store_details.country_code
 <img src="https://user-images.githubusercontent.com/33790455/223996146-fb5c25f0-5a5c-4347-af9b-19a5aac80926.png" width="370">
 
 9. How quickly company making sales?
+To perform this query we need to form new column in the table dim_times as agregation statement like  avg( LAG() ) is prohibited. 
+Thefore we create new column containing time difference between timestamps in dim_date_times table.
+```
+ALTER TABLE dim_date_times
+ADD COLUMN time_diff interval;
+
+UPDATE dim_date_times
+SET time_diff = x.time_diff
+FROM (
+  SELECT timestamp, timestamp - LAG(timestamp) OVER (ORDER BY timestamp) AS time_diff
+  FROM dim_date_times
+) AS x
+WHERE dim_date_times.timestamp = x.timestamp;
+```
+After creation of column time diff, task query much more straightforward
 ```
 select  dim_date_times.year, 		  
     concat('"hours": ',EXTRACT(hours FROM  avg(dim_date_times.time_diff)),' ',
