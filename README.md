@@ -85,18 +85,124 @@ As our primary and foreign keys are settled, we can start writting queries in ou
 
 1. How many stores does bisness have and in which countries?
 ```	
-select country_code, count (*) 
+select country_code, 
+	count (*) 
 from dim_store_details 
 group by country_code	
 ```
-<img src="https://user-images.githubusercontent.com/33790455/223984506-becc453f-ebff-4a07-9459-1fa842137abe.png"  height="200">
+<img src="https://user-images.githubusercontent.com/33790455/223984506-becc453f-ebff-4a07-9459-1fa842137abe.png"  height="150">
 
 The query result shows that we have one exception one. After checking it becomes clear, that it is a web store operating internationaly. 
 
 2. Which locations have the most stores?	
 ```
-select locality, count (*) 
+select locality, 
+	count (*) 
 from dim_store_details group by locality	
 ORDER BY COUNT(*) DESC;
 ```
-<img src="https://user-images.githubusercontent.com/33790455/223984506-becc453f-ebff-4a07-9459-1fa842137abe.png"  height="200">
+
+<img src="https://user-images.githubusercontent.com/33790455/223987621-292b53c5-15e6-4844-8aae-8dd1389d85cd.png"  height="200">
+3. Which months produce the most sales over all time of records?
+
+```
+select 	dim_date_times.month, 
+round(sum(orders_table.product_quantity*dim_products.product_price)) as total_revenue
+from orders_table
+	join dim_date_times on  orders_table.date_uuid = dim_date_times.date_uuid
+	join dim_products on  orders_table.product_code = dim_products.product_code
+group by dim_date_times.month
+ORDER BY sum(orders_table.product_quantity*dim_products.product_price) DESC;
+```
+
+<img src="https://user-images.githubusercontent.com/33790455/223988320-ea32b8df-834b-45cb-89c2-3041ec835bb5.png"  height="240">
+
+4. How many sales comes from online?
+
+```
+select 	count (orders_table.product_quantity) as numbers_of_sales,
+	sum(orders_table.product_quantity) as product_quantity_count,
+	case 
+		when dim_store_details.store_code = 'WEB-1388012W' then 'Web'
+	else 'Offline'
+	end as product_location
+from orders_table
+	join dim_date_times on  orders_table.date_uuid = dim_date_times.date_uuid
+	join dim_products on  orders_table.product_code = dim_products.product_code
+	join dim_store_details on orders_table.store_code = dim_store_details.store_code
+group by product_location
+ORDER BY sum(orders_table.product_quantity) ASC;
+```
+
+<img src="https://user-images.githubusercontent.com/33790455/223990808-d5cc1707-3476-4d1e-848e-e080d659d46a.png"  height="100">
+
+5. What percentage of sale come through the each type of store?
+
+```
+select 	dim_store_details.store_type, 
+		round(sum (orders_table.product_quantity*dim_products.product_price)) as revenue,
+		round(sum(100.0*orders_table.product_quantity*dim_products.product_price)/(sum(sum(orders_table.product_quantity*dim_products.product_price)) over ())) AS percentage_total
+from orders_table
+	join dim_date_times on  orders_table.date_uuid = dim_date_times.date_uuid
+	join dim_products on  orders_table.product_code = dim_products.product_code
+	join dim_store_details on orders_table.store_code = dim_store_details.store_code
+group by dim_store_details.store_type
+ORDER BY percentage_total DESC;
+```
+
+<img src="https://user-images.githubusercontent.com/33790455/223994056-0d4f0d86-6737-4617-beba-559482d7b412.png"  height="100">
+
+6. Which month in year produced the most sales?
+```
+select  dim_date_times.year,
+		dim_date_times.month, 
+		round(sum(orders_table.product_quantity*dim_products.product_price)) as revenue
+from orders_table
+	join dim_date_times    on  orders_table.date_uuid    = dim_date_times.date_uuid
+	join dim_products      on  orders_table.product_code = dim_products.product_code
+	join dim_store_details on orders_table.store_code    = dim_store_details.store_code
+group by 	dim_date_times.month,
+			dim_date_times.year
+ORDER BY    sum(orders_table.product_quantity*dim_products.product_price)  DESC;
+```
+<img src="https://user-images.githubusercontent.com/33790455/223994654-c1105925-130c-45a3-89e2-d03ada8ed18a.png"  height="100">
+
+7. What is the staff count?
+```
+select  sum(dim_store_details.staff_numbers) as total_staff_numbers, 
+	dim_store_details.country_code
+from dim_store_details
+group by dim_store_details.country_code
+```
+<img src="https://user-images.githubusercontent.com/33790455/223995198-0203d732-772f-4165-aeea-7e35e5189066.png"  height="100">
+8. Which German store saling the most?
+```
+select  round(count(orders_table.date_uuid)) as sales	, 
+		dim_store_details.store_type, 
+		dim_store_details.country_code
+from orders_table
+	join dim_date_times    on orders_table.date_uuid    = dim_date_times.date_uuid
+	join dim_products      on orders_table.product_code = dim_products.product_code
+	join dim_store_details on orders_table.store_code   = dim_store_details.store_code
+where dim_store_details.country_code = 'DE'
+group by 	dim_store_details.store_type,dim_store_details.country_code
+```
+<img src="https://user-images.githubusercontent.com/33790455/223996146-fb5c25f0-5a5c-4347-af9b-19a5aac80926.png"  height="100">
+
+9. How quickly company making sales?
+```
+select  dim_date_times.year, 		  
+    concat('"hours": ',EXTRACT(hours FROM  avg(dim_date_times.time_diff)),' ',
+		   '"minutes": ',EXTRACT(minutes FROM  avg(dim_date_times.time_diff)),' ',		  
+		   '"seconds": ',round(EXTRACT(seconds FROM  avg(dim_date_times.time_diff)),2),' '		  
+		  ) as actual_time_taken		 		  
+from dim_date_times
+group by dim_date_times.year
+order by avg(dim_date_times.time_diff) desc
+```
+<img src="https://user-images.githubusercontent.com/33790455/223996686-aee796e5-3446-45ac-9114-65f688f0b4fb.png"  height="100">
+
+
+
+
+
