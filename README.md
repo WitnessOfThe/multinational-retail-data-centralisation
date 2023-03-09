@@ -4,14 +4,14 @@ In this project, we create a local PostgreSQL database. We upload data from vari
 
 Key technologies used: Postgres, AWS (s3), boto3, rest-API, csv, Python (Pandas). 
 
-## Project utils
+## Project Utils
 
 1. Data extraction. In "data_extraction.py" we store methods responsible for the upload of data into pandas data frame from different sources. 
 2. Data cleaning. In "data_cleaning.py" we develop the class DataCleaning that clean different tables, which we uploaded in "data_extraction.py". 
 3. Uploading data into the database. We write DatabaseConnector class "database_utils.py", which initiates the database engine based on credentials provided in ".yml" file.
 4. "main.py" contains methods, which allow uploading data directly into the local database. 
 
-## Step by step data processing
+## Step by Step Data Processing
 
 We have 6 sources of data. 
 
@@ -81,7 +81,7 @@ UPDATE dim_products
 		END;
 ```
 
-## SQL queries
+## SQL Queries
 
 As our primary and foreign keys are settled and data are clean, we can start writing queries in our database. 
 
