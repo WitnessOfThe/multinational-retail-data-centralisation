@@ -90,7 +90,7 @@ select country_code,
 from dim_store_details 
 group by country_code	
 ```
-<img src="https://user-images.githubusercontent.com/33790455/223984506-becc453f-ebff-4a07-9459-1fa842137abe.png"  height="150">
+<img src="https://user-images.githubusercontent.com/33790455/223984506-becc453f-ebff-4a07-9459-1fa842137abe.png"  width="300">
 
 The query result shows that we have one exception one. After checking it becomes clear, that it is a web store operating internationaly. 
 
@@ -102,7 +102,7 @@ from dim_store_details group by locality
 ORDER BY COUNT(*) DESC;
 ```
 
-<img src="https://user-images.githubusercontent.com/33790455/223987621-292b53c5-15e6-4844-8aae-8dd1389d85cd.png"  height="200">
+<img src="https://user-images.githubusercontent.com/33790455/223987621-292b53c5-15e6-4844-8aae-8dd1389d85cd.png"  width="300">
 3. Which months produce the most sales over all time of records?
 
 ```
@@ -115,7 +115,7 @@ group by dim_date_times.month
 ORDER BY sum(orders_table.product_quantity*dim_products.product_price) DESC;
 ```
 
-<img src="https://user-images.githubusercontent.com/33790455/223988320-ea32b8df-834b-45cb-89c2-3041ec835bb5.png"  height="240">
+<img src="https://user-images.githubusercontent.com/33790455/223988320-ea32b8df-834b-45cb-89c2-3041ec835bb5.png" width="300">
 
 4. How many sales comes from online?
 
@@ -134,7 +134,7 @@ group by product_location
 ORDER BY sum(orders_table.product_quantity) ASC;
 ```
 
-<img src="https://user-images.githubusercontent.com/33790455/223990808-d5cc1707-3476-4d1e-848e-e080d659d46a.png"  height="100">
+<img src="https://user-images.githubusercontent.com/33790455/223990808-d5cc1707-3476-4d1e-848e-e080d659d46a.png"  width="370">
 
 5. What percentage of sale come through the each type of store?
 
@@ -150,7 +150,7 @@ group by dim_store_details.store_type
 ORDER BY percentage_total DESC;
 ```
 
-<img src="https://user-images.githubusercontent.com/33790455/223994056-0d4f0d86-6737-4617-beba-559482d7b412.png"  height="150">
+<img src="https://user-images.githubusercontent.com/33790455/223994056-0d4f0d86-6737-4617-beba-559482d7b412.png" width="370">
 
 6. Which month in year produced the most sales?
 
@@ -167,7 +167,7 @@ group by 	dim_date_times.month,
 ORDER BY    sum(orders_table.product_quantity*dim_products.product_price)  DESC;
 ```
 
-<img src="https://user-images.githubusercontent.com/33790455/223994654-c1105925-130c-45a3-89e2-d03ada8ed18a.png"  height="175">
+<img src="https://user-images.githubusercontent.com/33790455/223994654-c1105925-130c-45a3-89e2-d03ada8ed18a.png"  width="370">
 
 7. What is the staff count?
 ```
@@ -177,7 +177,7 @@ from dim_store_details
 group by dim_store_details.country_code
 ```
 
-<img src="https://user-images.githubusercontent.com/33790455/223995198-0203d732-772f-4165-aeea-7e35e5189066.png"  height="125">
+<img src="https://user-images.githubusercontent.com/33790455/223995198-0203d732-772f-4165-aeea-7e35e5189066.png"  width="300">
 
 8. Which German store saling the most?
 ```
@@ -192,7 +192,7 @@ where dim_store_details.country_code = 'DE'
 group by 	dim_store_details.store_type,dim_store_details.country_code
 ```
 
-<img src="https://user-images.githubusercontent.com/33790455/223996146-fb5c25f0-5a5c-4347-af9b-19a5aac80926.png"  height="125">
+<img src="https://user-images.githubusercontent.com/33790455/223996146-fb5c25f0-5a5c-4347-af9b-19a5aac80926.png" width="370">
 
 9. How quickly company making sales?
 ```
@@ -205,7 +205,7 @@ from dim_date_times
 group by dim_date_times.year
 order by avg(dim_date_times.time_diff) desc
 ```
-<img src="https://user-images.githubusercontent.com/33790455/223996686-aee796e5-3446-45ac-9114-65f688f0b4fb.png"  height="175">
+<img src="https://user-images.githubusercontent.com/33790455/223996686-aee796e5-3446-45ac-9114-65f688f0b4fb.png"  width="370">
 
 
 
