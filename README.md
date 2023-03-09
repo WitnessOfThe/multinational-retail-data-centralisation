@@ -80,8 +80,23 @@ UPDATE dim_products
 		END;
 ```
 
-
-
 ## SQL queries
+As our primary and foreign keys are settled, we can start writting queries in our database. 
 
-%%  example
+1. How many stores does bisness have and in which countries?
+```	
+select country_code, count (*) 
+from dim_store_details 
+group by country_code	
+```
+<img src="https://user-images.githubusercontent.com/33790455/223984506-becc453f-ebff-4a07-9459-1fa842137abe.png"  height="200">
+
+The query result shows that we have one exception one. After checking it becomes clear, that it is a web store operating internationaly. 
+
+2. Which locations have the most stores?	
+```
+select locality, count (*) 
+from dim_store_details group by locality	
+ORDER BY COUNT(*) DESC;
+```
+<img src="https://user-images.githubusercontent.com/33790455/223984506-becc453f-ebff-4a07-9459-1fa842137abe.png"  height="200">
