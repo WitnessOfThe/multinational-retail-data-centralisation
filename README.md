@@ -1,6 +1,6 @@
 # Data Centralisation Project
 
-In this project, we create a local PostgreSQL database. We upload data from various sources and create a database schema that allows us to efficiently query data. 
+In this project, we create a local PostgreSQL database. We upload data from various sources, process it, create a database schema and run SQL queries. 
 
 Key technologies used: Postgres, AWS (s3), boto3, rest-API, csv, Python (Pandas). 
 
