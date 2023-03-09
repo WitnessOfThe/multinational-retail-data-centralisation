@@ -150,9 +150,10 @@ group by dim_store_details.store_type
 ORDER BY percentage_total DESC;
 ```
 
-<img src="https://user-images.githubusercontent.com/33790455/223994056-0d4f0d86-6737-4617-beba-559482d7b412.png"  height="100">
+<img src="https://user-images.githubusercontent.com/33790455/223994056-0d4f0d86-6737-4617-beba-559482d7b412.png"  height="150">
 
 6. Which month in year produced the most sales?
+
 ```
 select  dim_date_times.year,
 		dim_date_times.month, 
@@ -165,7 +166,8 @@ group by 	dim_date_times.month,
 			dim_date_times.year
 ORDER BY    sum(orders_table.product_quantity*dim_products.product_price)  DESC;
 ```
-<img src="https://user-images.githubusercontent.com/33790455/223994654-c1105925-130c-45a3-89e2-d03ada8ed18a.png"  height="100">
+
+<img src="https://user-images.githubusercontent.com/33790455/223994654-c1105925-130c-45a3-89e2-d03ada8ed18a.png"  height="175">
 
 7. What is the staff count?
 ```
@@ -174,10 +176,12 @@ select  sum(dim_store_details.staff_numbers) as total_staff_numbers,
 from dim_store_details
 group by dim_store_details.country_code
 ```
-<img src="https://user-images.githubusercontent.com/33790455/223995198-0203d732-772f-4165-aeea-7e35e5189066.png"  height="100">
+
+<img src="https://user-images.githubusercontent.com/33790455/223995198-0203d732-772f-4165-aeea-7e35e5189066.png"  height="125">
+
 8. Which German store saling the most?
 ```
-select  round(count(orders_table.date_uuid)) as sales	, 
+select  round(count(orders_table.date_uuid)) as sales, 
 		dim_store_details.store_type, 
 		dim_store_details.country_code
 from orders_table
@@ -187,7 +191,8 @@ from orders_table
 where dim_store_details.country_code = 'DE'
 group by 	dim_store_details.store_type,dim_store_details.country_code
 ```
-<img src="https://user-images.githubusercontent.com/33790455/223996146-fb5c25f0-5a5c-4347-af9b-19a5aac80926.png"  height="100">
+
+<img src="https://user-images.githubusercontent.com/33790455/223996146-fb5c25f0-5a5c-4347-af9b-19a5aac80926.png"  height="125">
 
 9. How quickly company making sales?
 ```
@@ -200,7 +205,7 @@ from dim_date_times
 group by dim_date_times.year
 order by avg(dim_date_times.time_diff) desc
 ```
-<img src="https://user-images.githubusercontent.com/33790455/223996686-aee796e5-3446-45ac-9114-65f688f0b4fb.png"  height="100">
+<img src="https://user-images.githubusercontent.com/33790455/223996686-aee796e5-3446-45ac-9114-65f688f0b4fb.png"  height="175">
 
 
 
